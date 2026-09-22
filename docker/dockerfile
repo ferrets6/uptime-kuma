@@ -18,10 +18,13 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
 COPY --chown=node:node .npmrc .npmrc
 COPY --chown=node:node package.json package.json
 COPY --chown=node:node package-lock.json package-lock.json
-RUN npm ci --omit=dev
+# deploy only: full install + build, their CI builds dist/ on the host
+# before docker build, we don't have that step from a remote context
+RUN npm ci
 COPY . .
 COPY --chown=node:node --from=build_healthcheck /app/extra/healthcheck /app/extra/healthcheck
 RUN mkdir ./data
+RUN npm run build
 
 ############################################
 # ⭐ Main Image
@@ -39,7 +42,7 @@ COPY --chown=node:node --from=build /app /app
 EXPOSE 3001
 HEALTHCHECK --interval=60s --timeout=30s --start-period=180s --retries=5 CMD extra/healthcheck
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "server/server.js"]
+CMD ["node", "--import=tsx", "server/server.js"]
 
 ############################################
 # Rootless Image
