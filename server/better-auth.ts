@@ -91,6 +91,9 @@ function createAuthInstance() {
             haveIBeenPwned(),
 
             twoFactor({
+                // Skip password confirmation for accounts with no credential
+                // (e.g. OAuth-only). better-auth checks this per-user.
+                allowPasswordless: true,
                 schema: {
                     twoFactor: {
                         modelName: "better_auth_twoFactor",

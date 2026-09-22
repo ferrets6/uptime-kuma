@@ -33,6 +33,7 @@ export default {
                 initedSocketIO: false,
             },
             username: null,
+            hasPassword: false,
             remember: localStorage.remember !== "0",
             allowLoginDialog: false, // Allowed to show login dialog, but "loggedIn" have to be true too. This exists because prevent the login dialog show 0.1s in first before the socket server auth-ed.
             loggedIn: false,
@@ -59,7 +60,7 @@ export default {
                 running: false,
                 message: "",
                 errorMessage: "",
-                currentPassword: "",
+                stopConfirmText: "",
             },
             faviconUpdateDebounce: null,
             emitter: mitt(),
@@ -122,9 +123,10 @@ export default {
                 this.$router.push("/setup");
             });
 
-            socket.on("session", (username) => {
+            socket.on("session", (username, hasPassword) => {
                 this.loggedIn = true;
                 this.username = username;
+                this.hasPassword = hasPassword;
             });
 
             socket.on("loginRequired", () => {
@@ -385,6 +387,7 @@ export default {
                 console.log("Logged out");
                 this.loggedIn = false;
                 this.username = null;
+                this.hasPassword = false;
                 this.allowLoginDialog = false;
                 this.clearData();
                 reconnectSocket();

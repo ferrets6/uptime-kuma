@@ -15,6 +15,9 @@
                 </p>
 
                 <h5 class="my-4 settings-subheading">{{ $t("Change Password") }}</h5>
+                <p v-if="!hasPassword" class="text-muted">
+                    {{ $t("oauthNoPasswordMsg") }}
+                </p>
                 <form class="mb-3" @submit.prevent="savePassword">
                     <div class="mb-3">
                         <label for="current-password" class="form-label">
@@ -26,6 +29,7 @@
                             type="password"
                             class="form-control"
                             autocomplete="current-password"
+                            :disabled="!hasPassword"
                             required
                         />
                     </div>
@@ -40,6 +44,7 @@
                             type="password"
                             class="form-control"
                             autocomplete="new-password"
+                            :disabled="!hasPassword"
                             required
                         />
                     </div>
@@ -55,6 +60,7 @@
                             class="form-control"
                             :class="{ 'is-invalid': invalidPassword }"
                             autocomplete="new-password"
+                            :disabled="!hasPassword"
                             required
                         />
                         <div class="invalid-feedback">
@@ -63,7 +69,7 @@
                     </div>
 
                     <div>
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" :disabled="!hasPassword">
                             {{ $t("Update Password") }}
                         </button>
                     </div>
@@ -84,6 +90,9 @@
             <div class="my-4">
                 <!-- Advanced -->
                 <h5 class="my-4 settings-subheading">{{ $t("Advanced") }}</h5>
+                <p v-if="!settings.disableAuth && !hasPassword" class="text-muted">
+                    {{ $t("oauthNoDisableAuthMsg") }}
+                </p>
 
                 <div class="mb-4">
                     <button
@@ -98,6 +107,7 @@
                         v-if="!settings.disableAuth"
                         id="disableAuth-btn"
                         class="btn btn-primary me-2 mb-2"
+                        :disabled="!hasPassword"
                         @click="confirmDisableAuth"
                     >
                         {{ $t("Disable Auth") }}
@@ -174,6 +184,9 @@ export default {
         },
         settingsLoaded() {
             return this.$parent.$parent.$parent.settingsLoaded;
+        },
+        hasPassword() {
+            return this.$root.hasPassword;
         },
     },
 
