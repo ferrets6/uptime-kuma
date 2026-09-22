@@ -4,7 +4,7 @@
  * DO NOT require("./server") in other modules, it likely creates circular dependency!
  */
 import { getRandomInt, isDev, log, sleep } from "../src/util";
-import { auth, doubleCheckPassword, getDisableAuthSession, getSession } from "./better-auth";
+import { auth, authInternal, doubleCheckPassword, getDisableAuthSession, getSession } from "./better-auth";
 import { createBetterAuthRouter, needSetup } from "./routers/better-auth-router";
 import { betterAuthSocketHandler } from "./socket-handlers/better-auth-socket-handler";
 import { loadEnvFile } from "node:process";
@@ -389,7 +389,11 @@ app.use(function (req, res, next) {
         if (session) {
             socket.userID = session.user.id;
             socket.session = session;
-            socket.emit("session", session.user.username);
+
+            const accounts = await (await authInternal()).findAccounts(session.user.id);
+            const hasPassword = accounts.some((a) => a.providerId === "credential");
+
+            socket.emit("session", session.user.username, hasPassword);
             log.debug("auth", `Session active:`, session.session.ipAddress, session.user.username);
         }
 

@@ -38,7 +38,7 @@
                             </div>
                             <p v-if="showURI && twoFAStatus == false" class="text-break mt-2">{{ uri }}</p>
 
-                            <div v-if="!(uri && twoFAStatus == false)" class="mb-3">
+                            <div v-if="!(uri && twoFAStatus == false) && $root.hasPassword" class="mb-3">
                                 <label for="current-password" class="form-label">
                                     {{ $t("Current Password") }}
                                 </label>

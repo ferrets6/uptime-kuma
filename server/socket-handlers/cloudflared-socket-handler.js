@@ -2,7 +2,6 @@ const { checkLogin, setSetting, setting } = require("../util-server");
 const { CloudflaredTunnel } = require("node-cloudflared-tunnel");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
-const { doubleCheckPassword } = require("../better-auth");
 const io = UptimeKumaServer.getInstance().io;
 
 const prefix = "cloudflared_";
@@ -70,13 +69,9 @@ module.exports.cloudflaredSocketHandler = (socket) => {
         }
     });
 
-    socket.on(prefix + "stop", async (currentPassword, callback) => {
+    socket.on(prefix + "stop", async (callback) => {
         try {
             checkLogin(socket);
-            const disabledAuth = await setting("disableAuth");
-            if (!disabledAuth) {
-                await doubleCheckPassword(socket.request.headers.cookie, currentPassword);
-            }
             cloudflared.stop();
         } catch (error) {
             callback({

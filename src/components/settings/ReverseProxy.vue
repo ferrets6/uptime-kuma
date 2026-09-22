@@ -61,7 +61,12 @@
                     {{ $t("Start") }} cloudflared
                 </button>
 
-                <button v-if="running" class="btn btn-danger" type="submit" @click="$refs.confirmStop.show()">
+                <button
+                    v-if="running"
+                    class="btn btn-danger"
+                    type="submit"
+                    @click="$refs.confirmStop.show()"
+                >
                     {{ $t("Stop") }} cloudflared
                 </button>
 
@@ -74,20 +79,18 @@
                 >
                     {{
                         $t(
-                            "The current connection may be lost if you are currently connecting via Cloudflare Tunnel. Are you sure want to stop it? Type your current password to confirm it."
+                            "The current connection may be lost if you are currently connecting via Cloudflare Tunnel. Are you sure want to stop it? Type STOP to confirm it."
                         )
                     }}
 
-                    <p class="mt-2">{{ $t("disableCloudflaredNoAuthMsg") }}</p>
-
-                    <div v-if="!settings.disableAuth" class="mt-3">
-                        <label for="current-password2" class="form-label">
-                            {{ $t("Current Password") }}
+                    <div class="mt-3">
+                        <label for="stop-confirm-text" class="form-label">
+                            {{ $t("Type STOP to confirm") }}
                         </label>
                         <input
-                            id="current-password2"
-                            v-model="currentPassword"
-                            type="password"
+                            id="stop-confirm-text"
+                            v-model="stopConfirmText"
+                            type="text"
                             class="form-control"
                             required
                         />
@@ -200,7 +203,12 @@ export default {
          * @returns {void}
          */
         stop() {
-            this.$root.getSocket().emit(prefix + "stop", this.currentPassword, (res) => {
+            if (this.stopConfirmText !== "STOP") {
+                this.$root.toastRes({ ok: false, msg: this.$t("Type STOP to confirm") });
+                return;
+            }
+            this.$root.getSocket().emit(prefix + "stop", (res) => {
+                this.stopConfirmText = "";
                 this.$root.toastRes(res);
             });
         },
