@@ -61,6 +61,15 @@
                     {{ $t("Login") }}
                 </button>
 
+                <button
+                    v-if="$root.info.ssoEnabled && !tokenRequired"
+                    type="button"
+                    class="w-100 btn btn-outline-primary mt-2"
+                    @click="loginWithSSO"
+                >
+                    {{ $t("Login with SSO") }}
+                </button>
+
                 <div v-if="res && !res.ok" class="alert alert-danger mt-3" role="alert">
                     {{ $t(res.msg) }}
                 </div>
@@ -70,7 +79,7 @@
 </template>
 
 <script>
-import { login, verifyTotp } from "../auth-client";
+import { login, verifyTotp, loginWithSSO } from "../auth-client";
 import HiddenInput from "./HiddenInput.vue";
 
 export default {
@@ -128,6 +137,14 @@ export default {
                 this.res = { ok: false, msg: e.message };
             } finally {
                 this.processing = false;
+            }
+        },
+
+        async loginWithSSO() {
+            try {
+                await loginWithSSO();
+            } catch (e) {
+                this.res = { ok: false, msg: e.message };
             }
         },
     },

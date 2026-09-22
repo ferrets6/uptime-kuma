@@ -44,6 +44,16 @@ export async function login(username: string, password: string, remember: boolea
 }
 
 /**
+ * @param providerId Provider id configured server-side via UPTIME_KUMA_OIDC_PROVIDER_ID (default "sso")
+ */
+export async function loginWithSSO(providerId: string = "sso") {
+    await authClient.signIn.social({
+        provider: providerId,
+        callbackURL: "/",
+    });
+}
+
+/**
  * @param token Token
  */
 export async function verifyTotp(token: string) {

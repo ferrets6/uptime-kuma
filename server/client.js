@@ -9,6 +9,7 @@ const io = server.io;
 const { setting } = require("./util-server");
 const checkVersion = require("./check-version");
 const Database = require("./database");
+const { isSSOEnabled } = require("./better-auth");
 
 /**
  * Send list of notification providers to client
@@ -147,6 +148,7 @@ async function sendInfo(socket, hideVersion = false) {
         primaryBaseURL: await setting("primaryBaseURL"),
         serverTimezone: await server.getTimezone(),
         serverTimezoneOffset: server.getTimezoneOffset(),
+        ssoEnabled: isSSOEnabled(),
     };
     if (!hideVersion) {
         info.version = checkVersion.version;
