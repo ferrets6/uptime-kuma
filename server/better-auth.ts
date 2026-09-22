@@ -9,6 +9,7 @@ import { Socket } from "socket.io";
 import { haveIBeenPwned } from "better-auth/plugins";
 import { twoFactor } from "better-auth/plugins";
 import { apiKey } from "@better-auth/api-key";
+import { genericOAuth } from "better-auth/plugins";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 // @ts-ignore
 import * as oldAuth from "./auth.js";
@@ -106,6 +107,17 @@ function createAuthInstance() {
                 },
             }),
 
+            ...(isSSOEnabled() ? [ genericOAuth({
+                config: [ {
+                    providerId: process.env.UPTIME_KUMA_OIDC_PROVIDER_ID || "sso",
+                    clientId: process.env.UPTIME_KUMA_OIDC_CLIENT_ID as string,
+                    clientSecret: process.env.UPTIME_KUMA_OIDC_CLIENT_SECRET as string,
+                    discoveryUrl: process.env.UPTIME_KUMA_OIDC_DISCOVERY_URL as string,
+                    redirectURI: process.env.UPTIME_KUMA_OIDC_REDIRECT_URI as string,
+                    scopes: (process.env.UPTIME_KUMA_OIDC_SCOPES || "openid profile email").split(" "),
+                } ],
+            }) ] : []),
+
             // It is not suitable for "Disable Auth", because it can not turn on/off after init.
             //anonymous(),
         ],
@@ -137,6 +149,17 @@ function createAuthInstance() {
             }),
         },
     });
+}
+
+/**
+ * @returns True if OIDC/OAuth2 login is configured via env vars
+ */
+export function isSSOEnabled(): boolean {
+    return process.env.UPTIME_KUMA_OIDC_ENABLED === "true"
+        && !!process.env.UPTIME_KUMA_OIDC_CLIENT_ID
+        && !!process.env.UPTIME_KUMA_OIDC_CLIENT_SECRET
+        && !!process.env.UPTIME_KUMA_OIDC_DISCOVERY_URL
+        && !!process.env.UPTIME_KUMA_OIDC_REDIRECT_URI;
 }
 
 /**
